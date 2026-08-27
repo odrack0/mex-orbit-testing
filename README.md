@@ -8,8 +8,12 @@ algo está bien, no el algo en sí.
 | | Dónde | Por qué |
 |---|---|---|
 | El **autotest del juego** (loop, chat, reconexión, portal, ajustes, ventanas, bestiario) | `mex-orbit-client` — `game/world.gd` + `tools/dev-run.ps1` | Es la puerta del cliente y se ejecuta con él; separarlo obligaría a mantener dos versiones del mismo recorrido |
-| El **pipeline de arte** (recorte de croma, atlas, emisivas, anclas) | `mex-orbit-art/tools/` | Produce assets, no los juzga |
+| El **pipeline de arte** (recorte de croma, atlas, emisivas, anclas, normalizar modelos) | `mex-orbit-art/tools/` | Produce assets, no los juzga |
+| El **banco de rendimiento 3D** | `mex-orbit-client` — `pruebas/banco_3d.tscn` | Es una escena de Godot, y un banco solo significa algo dentro del proyecto cuyos ajustes mide: renderizador, import de texturas, `project.godot` |
 | **Validar y medir** antes y después | **aquí** | Se usa desde cualquier repo y no pertenece a ninguno |
+
+La línea, cuando haya duda: **herramientas que se ejecutan solas van aquí; escenas
+que necesitan el motor van en el repo del motor.**
 
 ## Herramientas
 
@@ -49,6 +53,37 @@ py -3 assets/matiz.py ../mex-orbit-art/source/renders/Portal.mp4 120
 El color no es opinión. El portal llegó a **2 grados** del cyan que identifica al
 jugador y la base en azul-violeta cuando su token es el cyan; ninguna de las dos
 cosas chirría mirándolas, y las dos rompen el código de color.
+
+### `assets/validar-modelo.py`
+
+El contrato de un modelo 3D, comprobado **antes** de normalizarlo. Lee el GLB en
+crudo: no necesita Blender ni Godot, solo PIL y numpy.
+
+```bash
+py -3 assets/validar-modelo.py ../mex-orbit-art/source/3d-models/crudo/vexor-texture.glb
+py -3 assets/validar-modelo.py ../mex-orbit-art/source/3d-models/vexor.glb 200000 1024
+```
+
+Misma historia que `validar-video.py`, otro eje. El primer modelo que llegó de
+Meshy incumplía cinco cosas a la vez y cada una se midió a mano: dos millones de
+triángulos, tres texturas de 2048, venía **de pie** en vez de tumbado, y los
+núcleos rojos estaban pintados en el albedo con la emisión a cero — se veían
+rojos y no iban a brillar.
+
+**Está calibrada contra ese Vexor**: el crudo saca seis rechazos y el master de
+trabajo pasa con dos avisos.
+
+- La **orientación** se juzga por la caja, no por metadatos: en un juego cenital
+  el alto es siempre la dimensión menor. Meshy lee la imagen como un póster y
+  devuelve el largo en vertical.
+- El **pivote** importa aunque no se vea: descentrado, el bicho orbita en vez de
+  virar, y eso no sale en una captura fija.
+- La **luz cocida** es la única prueba que puede invalidar el enfoque entero —y
+  la más débil de las seis. Sobre un atlas de UV un gradiente global no dice
+  gran cosa, así que un desbalance alto **avisa, no rechaza**: es un «ábrelo y
+  mira». En el Vexor da 0,03 contra un umbral de 0,22.
+- **Sin animaciones y sin marcadores** son avisos, no rechazos: hay modelos que
+  legítimamente no llevan ninguna de las dos cosas.
 
 ### `capturas/comparar.py`
 

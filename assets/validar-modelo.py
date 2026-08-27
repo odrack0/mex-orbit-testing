@@ -150,6 +150,23 @@ def main():
     print('MODELO  %s  (%.1f MB)' % (os.path.basename(ruta), os.path.getsize(ruta) / 1048576.0))
     print('        presupuesto: %d tris, texturas de %d' % (tope_tris, tope_lado))
 
+    # --- piezas ---
+    # Con la opcion "Dividir" de Meshy el modelo llega partido, que es lo que
+    # hace falta para animar por rotacion de nodos en vez de por clave de forma.
+    # Saberlo de un vistazo es lo primero que se mira al recibirlo.
+    nodos_malla = [n for n in doc.get('nodes', []) if 'mesh' in n]
+    print('\nPIEZAS       %d' % len(nodos_malla))
+    for n in nodos_malla:
+        m = doc['meshes'][n['mesh']]
+        t = sum(doc['accessors'][p['indices']]['count'] // 3
+                for p in m.get('primitives', []) if 'indices' in p)
+        print('             %-20s %d tris' % (n.get('name', '(sin nombre)')[:20], t))
+    if len(nodos_malla) == 1:
+        avisos_piezas = ('una sola pieza: para articular hara falta partirla, y lo que este '
+                         'fusionado en la malla no se puede separar sin inventar geometria')
+    else:
+        avisos_piezas = ''
+
     # --- triangulos ---
     tris = triangulos(doc)
     print('\nTRIANGULOS   %d' % tris)
@@ -221,6 +238,13 @@ def main():
     print('MARCADORES   %s' % (', '.join(marcas) if marcas else 'ninguno'))
     if not marcas:
         avisos.append('sin marcadores tobera_*/canon_*: no hay de donde colgar llamas ni disparos')
+
+    if avisos_piezas:
+        avisos.append(avisos_piezas)
+    if len(nodos_malla) > 1 and len(doc.get('materials', [])) > 1:
+        avisos.append('%d piezas con %d materiales: son varias draw calls por bicho. Lo ideal '
+                      'es un material y un atlas para todo el modelo'
+                      % (len(nodos_malla), len(doc['materials'])))
 
     return informe(problemas, avisos)
 

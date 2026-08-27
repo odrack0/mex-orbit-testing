@@ -106,18 +106,45 @@ def triangulos(doc):
 
 def caja(doc):
     """Caja envolvente en coordenadas glTF (Y arriba), de los min/max que el
-    propio accessor ya trae: no hace falta descomprimir un solo vertice."""
+    propio accessor ya trae: no hace falta descomprimir un solo vertice.
+
+    Se recorre por NODOS y acumulando la transformacion del padre, no por mallas
+    sueltas. En un modelo partido cada ala guarda sus vertices relativos a su
+    bisagra y su posicion vive en el nodo; sumando solo los accessors salia una
+    caja mas estrecha que el bicho (1,31 en vez de 1,91) y el aviso de
+    orientacion se disparaba solo."""
     lo = np.array([np.inf] * 3)
     hi = np.array([-np.inf] * 3)
-    for malla in doc.get('meshes', []):
-        for prim in malla.get('primitives', []):
-            idx = prim.get('attributes', {}).get('POSITION')
-            if idx is None:
-                continue
-            acc = doc['accessors'][idx]
-            if 'min' in acc and 'max' in acc:
-                lo = np.minimum(lo, acc['min'])
-                hi = np.maximum(hi, acc['max'])
+    nodos = doc.get('nodes', [])
+
+    def recorrer(i, off, esc):
+        nonlocal lo, hi
+        n = nodos[i]
+        t = np.array(n.get('translation', [0.0, 0.0, 0.0]), dtype=float)
+        s = np.array(n.get('scale', [1.0, 1.0, 1.0]), dtype=float)
+        # Sin rotacion: los modelos del contrato no la llevan en los nodos, y
+        # tenerla en cuenta pediria matrices completas para poca ganancia.
+        off2, esc2 = off + t * esc, esc * s
+        if 'mesh' in n:
+            for prim in doc['meshes'][n['mesh']].get('primitives', []):
+                idx = prim.get('attributes', {}).get('POSITION')
+                if idx is None:
+                    continue
+                acc = doc['accessors'][idx]
+                if 'min' in acc and 'max' in acc:
+                    a = np.array(acc['min']) * esc2 + off2
+                    b = np.array(acc['max']) * esc2 + off2
+                    lo = np.minimum(lo, np.minimum(a, b))
+                    hi = np.maximum(hi, np.maximum(a, b))
+        for h in n.get('children', []):
+            recorrer(h, off2, esc2)
+
+    raices = set(range(len(nodos)))
+    for n in nodos:
+        for h in n.get('children', []):
+            raices.discard(h)
+    for i in sorted(raices):
+        recorrer(i, np.zeros(3), np.ones(3))
     return lo, hi
 
 

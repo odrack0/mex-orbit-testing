@@ -255,10 +255,29 @@ def main():
         avisos.append('sin textura de color base: no se pudo mirar la luz cocida')
 
     # --- lo que no rechaza pero conviene saber ---
-    anims = [a.get('name', '(sin nombre)') for a in doc.get('animations', [])]
-    print('ANIMACIONES  %s' % (', '.join(anims) if anims else 'ninguna'))
+    # El NOMBRE de la animacion no basta, y costo dos fallos averiguarlo. Uno: el
+    # exportador de glTF tira la animacion entera sin dar error si el objeto tiene
+    # dos modos de rotacion conviviendo, y el GLB sale con cero canales. Otro: si
+    # cada pieza lleva su propia Action salen animaciones SEPARADAS —una por ala—
+    # y el motor reproduce una sola, moviendo medio bicho. Las dos se ven aqui.
+    anims = doc.get('animations', [])
+    print('ANIMACIONES  %d' % len(anims))
+    nombres_nodo = [n.get('name', '?') for n in doc.get('nodes', [])]
+    for a in anims:
+        print("             '%s'  %d canales" % (a.get('name', '(sin nombre)'), len(a['channels'])))
+        for ch in a['channels']:
+            s = a['samplers'][ch['sampler']]
+            ti = doc['accessors'][s['input']]
+            dur = ti.get('max', [0])[0]
+            objetivo = nombres_nodo[ch['target']['node']] if 'node' in ch['target'] else '?'
+            print('               %-20s %-11s %d claves  %.2fs'
+                  % (objetivo[:20], ch['target']['path'], ti['count'], dur))
     if not anims:
         avisos.append('sin animaciones: el bicho va a estar quieto')
+    elif len(anims) > 1:
+        avisos.append('%d animaciones separadas: el motor reproduce una sola. Si cada pieza '
+                      'lleva su propia Action, exporta con animation_mode=SCENE para que '
+                      'salgan como una con varios canales' % len(anims))
 
     marcas = [n.get('name', '') for n in doc.get('nodes', [])
               if n.get('name', '').startswith(('tobera', 'canon'))]

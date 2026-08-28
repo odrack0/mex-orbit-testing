@@ -188,9 +188,19 @@ def main():
         t = sum(doc['accessors'][p['indices']]['count'] // 3
                 for p in m.get('primitives', []) if 'indices' in p)
         print('             %-20s %d tris' % (n.get('name', '(sin nombre)')[:20], t))
-    if len(nodos_malla) == 1:
-        avisos_piezas = ('una sola pieza: para articular hara falta partirla, y lo que este '
-                         'fusionado en la malla no se puede separar sin inventar geometria')
+    # Un modelo con ESQUELETO no necesita venir partido: articula por pesos, y es
+    # la forma buena — no deja costura en las bisagras, porque no hay corte. El
+    # aviso de "una sola pieza" solo tiene sentido sobre una malla suelta y sin
+    # huesos; sobre un modelo rigueado era sencillamente falso.
+    huesos = []
+    for s in doc.get('skins', []):
+        huesos += [doc['nodes'][j].get('name', '?') for j in s.get('joints', [])]
+    print('ESQUELETO    %s' % (', '.join(huesos) if huesos else 'ninguno'))
+
+    if len(nodos_malla) == 1 and not huesos:
+        avisos_piezas = ('una sola pieza y sin esqueleto: para articular hara falta partirla o '
+                         'riguearla, y lo que este fusionado en la malla no se puede separar '
+                         'sin inventar geometria')
     else:
         avisos_piezas = ''
 

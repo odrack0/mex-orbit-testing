@@ -17,30 +17,10 @@ que necesitan el motor van en el repo del motor.**
 
 ## Herramientas
 
-### `assets/validar-video.py`
+### `assets/validar-video.py` (retirado el 1-sep-2026)
 
-La batería completa sobre un vídeo de asset, **antes** de meterlo al pipeline.
-Croma, encuadre, costura del bucle, sub-bucle y sugerencia de celda.
-
-```bash
-py -3 assets/validar-video.py ../mex-orbit-art/source/renders/Ferox.mp4 12 190
-```
-
-Cinco vídeos se rechazaron por el mismo tipo de fallo y cada vez se midió a mano.
-Un `APTO` no garantiza que el asset se vea bien —eso hay que mirarlo—, pero un
-`RECHAZAR` ahorra el viaje entero de exportar, integrar, capturar y descubrirlo.
-
-**Está calibrada contra los assets que ya pasaron**, y eso encontró dos fallos en
-su primera versión: rechazaba al Ferox y al Vex, que llevan días en el juego.
-
-- La **deriva del centroide** no se juzga en píxeles sueltos sino en **porcentaje
-  del tamaño del bicho**. Un Ferox de 990 px que despliega guadañas mueve su
-  centroide 31 px sin moverse del sitio: la forma cambia y el centro de masa la
-  sigue. Eso es un 3% y es normal.
-- El **sub-bucle** necesita **dos** condiciones, no una. Comparar solo contra el
-  vídeo entero decía que "0..11 cierra igual de bien" cuando el entero cerraba a
-  6,6× — cierto y completamente inútil. El tramo tiene que cerrar bien *en
-  absoluto* **y** tan bien como el entero.
+Validaba los vídeos de los atlas animados. El cliente es 3D en los tres niveles y ya no hay atlas:
+la validación de assets es solo `validar-modelo.py`.
 
 ### `assets/matiz.py`
 

@@ -8,7 +8,7 @@ atlas entero cuesta 11,7), venia DE PIE en vez de tumbado en el plano, y los
 nucleos rojos estaban pintados en el albedo con la emision a cero, o sea que no
 brillaban. Esto es esa medicion, hecha una vez y bien.
 
-Mismo criterio que `validar-video.py`: un `APTO` no garantiza que el modelo se
+Un `APTO` no garantiza que el modelo se
 vea bien —eso hay que mirarlo, y ademas en 3D el aspecto final lo pone la luz de
 la escena, no el archivo— pero un `RECHAZAR` ahorra el viaje entero de
 normalizar, importar, montar la escena y descubrirlo.

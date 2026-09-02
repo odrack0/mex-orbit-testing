@@ -9,7 +9,7 @@ algo está bien, no el algo en sí.
 |---|---|---|
 | El **autotest del juego** (loop, chat, reconexión, portal, ajustes, ventanas, bestiario) | `mex-orbit-client` — `game/world.gd` + `tools/dev-run.ps1` | Es la puerta del cliente y se ejecuta con él; separarlo obligaría a mantener dos versiones del mismo recorrido |
 | El **pipeline de arte** (recorte de croma, atlas, emisivas, anclas, normalizar modelos) | `mex-orbit-art/tools/` | Produce assets, no los juzga |
-| El **banco de rendimiento 3D** | `mex-orbit-client` — `pruebas/banco_3d.tscn` | Es una escena de Godot, y un banco solo significa algo dentro del proyecto cuyos ajustes mide: renderizador, import de texturas, `project.godot` |
+| El **banco de rendimiento 3D** | `mex-orbit-client` — `tests/bench_3d.tscn` | Es una escena de Godot, y un banco solo significa algo dentro del proyecto cuyos ajustes mide: renderizador, import de texturas, `project.godot` |
 | **Validar y medir** antes y después | **aquí** | Se usa desde cualquier repo y no pertenece a ninguno |
 
 La línea, cuando haya duda: **herramientas que se ejecutan solas van aquí; escenas

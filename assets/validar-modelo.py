@@ -17,7 +17,7 @@ Lee el GLB en crudo: no necesita Blender ni Godot, solo PIL y numpy.
 
 Uso:  py -3 assets/validar-modelo.py <modelo.glb> [tris] [lado_textura]
 
-  tris          presupuesto de triangulos (por defecto 15000, el asset de juego)
+  tris          presupuesto de triangulos (por defecto 60000; medido 2-sep-2026, ver comentario)
   lado_textura  lado maximo de cada mapa (por defecto 512)
 
 Para juzgar un MASTER de trabajo en vez de un asset de juego, subir los dos:
@@ -56,7 +56,11 @@ from io import BytesIO
 import numpy as np
 from PIL import Image
 
-TRIS = 15000          # presupuesto por defecto: el asset de juego
+# 2-sep-2026: el presupuesto de 15 000 era de antes de los LOD automaticos del
+# import de Godot. Medido con el banco (iGPU, 15 bichos): 58 106 tris/bicho =
+# 102 fps y 9 884 tris/bicho = 103,5 fps. Los triangulos ya no son el coste;
+# el tope de 60 000 es una alarma contra remeshes sin hacer (100 k+), no un dial.
+TRIS = 60000          # presupuesto por defecto: el asset de juego
 LADO = 512            # lado maximo por mapa
 PIVOTE_MAX = 0.02     # el centro de la caja, a menos del 2% del tamanio del origen
 DESBALANCE = 0.22     # gradiente global de luminancia que enciende el aviso

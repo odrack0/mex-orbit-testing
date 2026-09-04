@@ -17,8 +17,8 @@ Lee el GLB en crudo: no necesita Blender ni Godot, solo PIL y numpy.
 
 Uso:  py -3 assets/validar-modelo.py <modelo.glb> [tris] [lado_textura]
 
-  tris          presupuesto de triangulos (por defecto 60000; medido 2-sep-2026, ver comentario)
-  lado_textura  lado maximo de cada mapa (por defecto 512)
+  tris          presupuesto de triangulos (por defecto 120000; medido 3-sep-2026, ver comentario)
+  lado_textura  lado maximo de cada mapa (por defecto 1024, lo que saca normalize-model.py)
 
 Para juzgar un MASTER de trabajo en vez de un asset de juego, subir los dos:
 `py -3 assets/validar-modelo.py vexor.glb 200000 1024`.
@@ -57,11 +57,15 @@ import numpy as np
 from PIL import Image
 
 # 2-sep-2026: el presupuesto de 15 000 era de antes de los LOD automaticos del
-# import de Godot. Medido con el banco (iGPU, 15 bichos): 58 106 tris/bicho =
-# 102 fps y 9 884 tris/bicho = 103,5 fps. Los triangulos ya no son el coste;
-# el tope de 60 000 es una alarma contra remeshes sin hacer (100 k+), no un dial.
-TRIS = 60000          # presupuesto por defecto: el asset de juego
-LADO = 512            # lado maximo por mapa
+# import de Godot. Medido con el banco (iGPU): 15 bichos de 58 106 tris = 102 fps
+# contra 15 de 9 884 = 103,5 (2-sep); 30 bichos de 150 000 = 81,9 fps contra 30
+# de 56 265 = 81,2 (3-sep). Los triangulos ya no son el coste. Desde el 3-sep la
+# malla del juego se decima del alto de Meshy a 100 000 (decimar-y-vestir.py de
+# arte); el tope de 120 000 es la alarma contra un alto sin decimar, no un dial.
+# Las texturas: la cadena saca el master a 1024 desde hace semanas y el tope de
+# 512 rechazaba assets correctos (Vex, Vexor); alineado el 3-sep.
+TRIS = 120000         # presupuesto por defecto: el asset de juego
+LADO = 1024           # lado maximo por mapa
 PIVOTE_MAX = 0.02     # el centro de la caja, a menos del 2% del tamanio del origen
 DESBALANCE = 0.22     # gradiente global de luminancia que enciende el aviso
 

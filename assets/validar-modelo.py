@@ -237,7 +237,12 @@ def main():
     mayor = float(ext.max())
     # glTF es Y-arriba: X ancho, Y alto, Z largo
     print('\nCAJA         ancho %.3f  alto %.3f  largo %.3f' % (ext[0], ext[1], ext[2]))
-    if ext[1] > min(ext[0], ext[2]):
+    # un cuerpo casi esferico (3-sep-2026, ACI-01 de Tripo: 0,962 x 0,996 x 1,000)
+    # no tiene eje fino: la regla del "entra de pie" no dice nada de el
+    if mayor > 0 and float(ext.min()) / mayor > 0.9:
+        print('             caja casi esferica (%.0f%% entre ejes): sin eje fino, la orientacion la fija el JSON'
+              % (100.0 * float(ext.min()) / mayor))
+    elif ext[1] > min(ext[0], ext[2]):
         problemas.append('el alto (%.3f) no es la dimension menor: el modelo entra de pie'
                          % ext[1])
     print('PIVOTE       centro en (%.3f, %.3f, %.3f)' % tuple(centro))
